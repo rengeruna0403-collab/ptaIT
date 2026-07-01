@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PTA ナレッジベース 管理ページ</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { margin: 0; font-family: var(--font, 'Noto Sans JP', sans-serif); background: var(--bg, #f5f5f7); }
+    .admin-page { max-width: 1100px; margin: 0 auto; padding: 20px; }
+    .admin-header { background: var(--primary, #2563eb); color: #fff; padding: 14px 20px; display: flex; align-items: center; gap: 14px; }
+    .admin-header h1 { margin: 0; font-size: 1.1rem; }
+    .admin-header a { color: rgba(255,255,255,.8); font-size: .82rem; text-decoration: none; margin-left: auto; }
+    .admin-header a:hover { color: #fff; }
+    .admin-toolbar { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; margin: 16px 0 10px; }
+    .admin-toolbar select, .admin-toolbar input { padding: 7px 10px; border: 1px solid #ddd; border-radius: 6px; font-size: .85rem; background: #fff; }
+    .admin-toolbar input { flex: 1; min-width: 200px; }
+    .admin-table-wrap { overflow-x: auto; }
+    .admin-table { width: 100%; border-collapse: collapse; font-size: .82rem; background: #fff; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+    .admin-table th { background: #f8fafc; padding: 10px 12px; text-align: left; border-bottom: 2px solid #e5e7eb; color: #555; cursor: pointer; white-space: nowrap; user-select: none; }
+    .admin-table th:hover { background: #eef2ff; }
+    .admin-table td { padding: 9px 12px; border-bottom: 1px solid #f0f0f0; vertical-align: middle; }
+    .admin-table tr:hover td { background: #fafbff; }
+    .admin-table .col-id { color: #999; font-size: .75rem; font-family: monospace; }
+    .admin-table .col-title { font-weight: 500; }
+    .admin-table .col-cat { font-size: .78rem; color: #666; }
+    .admin-table .col-imp { text-align: center; }
+    .admin-table .col-vis { text-align: center; }
+    .importance-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
+    .imp-high { background: #ef4444; }
+    .imp-medium { background: #f59e0b; }
+    .imp-low { background: #10b981; }
+    .vis-public { color: #16a34a; font-size: .78rem; }
+    .vis-private { color: #9ca3af; font-size: .78rem; }
+    .badge-cell { display: flex; gap: 3px; flex-wrap: wrap; }
+    .count-bar { font-size: .8rem; color: #666; margin: 6px 0; }
+    .count-bar strong { color: var(--primary, #2563eb); }
+    /* テンプレートセクション */
+    .template-section { background: #fff; border-radius: 10px; padding: 20px; margin-top: 24px; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+    .template-section h2 { font-size: 1rem; margin: 0 0 12px; color: #333; }
+    .template-desc { font-size: .82rem; color: #666; margin-bottom: 10px; line-height: 1.7; }
+    .copy-btn { background: var(--primary, #2563eb); color: #fff; border: none; border-radius: 6px; padding: 7px 16px; font-size: .83rem; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+    .copy-btn:hover { background: #1d4ed8; }
+    .copy-btn.copied { background: #16a34a; }
+    .template-code { background: #f8fafc; border: 1px solid #e5e7eb; border-radius: 8px; padding: 14px; font-size: .78rem; font-family: 'Courier New', monospace; line-height: 1.7; overflow-x: auto; margin-top: 10px; white-space: pre; }
+    /* 手順チェックリスト */
+    .checklist-section { background: #fff; border-radius: 10px; padding: 20px; margin-top: 20px; box-shadow: 0 2px 8px rgba(0,0,0,.06); }
+    .checklist-section h2 { font-size: 1rem; margin: 0 0 12px; }
+    .checklist-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 10px; }
+    .checklist-item { background: #f8fafc; border-radius: 8px; padding: 12px; border: 1px solid #e5e7eb; }
+    .checklist-item label { display: flex; gap: 8px; align-items: flex-start; cursor: pointer; font-size: .83rem; line-height: 1.5; }
+    .checklist-item input[type=checkbox] { margin-top: 3px; accent-color: var(--primary, #2563eb); flex-shrink: 0; }
+    .checklist-item .ci-cat { font-size: .7rem; color: #999; display: block; }
+    .checklist-reset { margin-top: 10px; background: none; border: 1px solid #ddd; border-radius: 6px; padding: 5px 14px; font-size: .8rem; cursor: pointer; color: #666; }
+    .checklist-reset:hover { background: #f5f5f5; }
+    .sort-asc::after { content: ' ▲'; }
+    .sort-desc::after { content: ' ▼'; }
+  </style>
+</head>
+<body>
+
+<div class="admin-header">
+  <span>⚙️</span>
+  <h1>PTA ナレッジベース — 管理ページ</h1>
+  <a href="index.html">← ナレッジベースに戻る</a>
+</div>
+
+<div class="admin-page">
+
+  <!-- FAQ一覧 -->
+  <div class="admin-toolbar">
+    <select id="filter-cat" onchange="applyFilters()">
+      <option value="">すべてのカテゴリ</option>
+    </select>
+    <select id="filter-imp" onchange="applyFilters()">
+      <option value="">すべての重要度</option>
+      <option value="high">高（red）</option>
+      <option value="medium">中（amber）</option>
+      <option value="low">低（green）</option>
+    </select>
+    <select id="filter-vis" onchange="applyFilters()">
+      <option value="">公開・非公開</option>
+      <option value="public">公開</option>
+      <option value="private">非公開</option>
+    </select>
+    <select id="filter-tag" onchange="applyFilters()">
+      <option value="">すべてのタグ</option>
+      <option value="よく聞かれる">⭐ よく聞かれる</option>
+      <option value="引き継ぎ">🤝 引き継ぎ</option>
+      <option value="年度初め">🌸 年度初め</option>
+      <option value="個人情報">🔒 個人情報</option>
+    </select>
+    <input type="text" id="filter-text" placeholder="タイトル・キーワード検索" oninput="applyFilters()">
+  </div>
+
+  <div class="count-bar">表示中: <strong id="count-display">0</strong> 件 / 全 <strong id="count-total">0</strong> 件</div>
+
+  <div class="admin-table-wrap">
+    <table class="admin-table" id="admin-table">
+      <thead>
+        <tr>
+          <th onclick="sortTable('id')">ID</th>
+          <th onclick="sortTable('category')">カテゴリ</th>
+          <th onclick="sortTable('title')">タイトル</th>
+          <th onclick="sortTable('importance')">重要度</th>
+          <th onclick="sortTable('visibility')">公開</th>
+          <th>タグ</th>
+          <th>引継</th>
+          <th onclick="sortTable('lastUpdated')">更新日</th>
+        </tr>
+      </thead>
+      <tbody id="admin-tbody"></tbody>
+    </table>
+  </div>
+
+  <!-- テンプレートセクション -->
+  <div class="template-section">
+    <h2>📋 FAQ追加用テンプレート</h2>
+    <p class="template-desc">
+      新しいFAQを追加するときは、下のテンプレートをコピーして <code>faqData.js</code> の <code>faqList</code> 配列に貼り付けてください。<br>
+      <code>id</code> は他のFAQと重複しない英数字・ハイフンで設定してください。
+    </p>
+    <button class="copy-btn" id="copy-btn" onclick="copyTemplate()">📋 テンプレートをコピー</button>
+    <div class="template-code" id="template-code"></div>
+  </div>
+
+  <!-- 引き継ぎチェックリスト -->
+  <div class="checklist-section">
+    <h2>🤝 引き継ぎチェックリスト</h2>
+    <p style="font-size:.82rem;color:#666;margin-bottom:12px">
+      役員交代時（3月〜4月）に確認が必要な項目です。完了したらチェックを入れてください。
+    </p>
+    <div class="checklist-grid" id="checklist-grid"></div>
+    <button class="checklist-reset" onclick="resetChecklist()">チェックをすべてリセット</button>
+  </div>
+
+</div>
+
+<script src="faqData.js"></script>
+<script src="admin.js"></script>
+</body>
+</html>

@@ -3,103 +3,104 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PTA IT サポートチャットボット</title>
+  <title>PTA IT ナレッジベース</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
 
-<!-- ================================================================
-     メインアプリ
-     ================================================================ -->
-<div class="app-wrapper">
-
-  <!-- ヘッダー -->
-  <header class="app-header">
+<!-- ヘッダー -->
+<header class="app-header">
+  <div class="header-top">
     <div class="header-icon">💬</div>
     <div>
-      <h1>PTA IT サポートチャットボット</h1>
-      <div class="header-sub">Google Workspace・スマホ操作など、お気軽にどうぞ</div>
+      <h1>PTA IT ナレッジベース</h1>
+      <div class="sub">Google Workspace・引き継ぎ・IT操作のよくある質問</div>
     </div>
-  </header>
+    <a href="admin.html" style="margin-left:auto;color:rgba(255,255,255,.7);font-size:.75rem;text-decoration:none;white-space:nowrap">⚙️ 管理</a>
+  </div>
+  <nav class="mode-tabs">
+    <button class="mode-tab active" onclick="switchMode('chat',this)">💬 チャット</button>
+    <button class="mode-tab" onclick="switchMode('browse',this)">🔍 さがす・しぼる</button>
+  </nav>
+</header>
 
-  <!-- 個人情報の注意 -->
-  <div class="privacy-note">
-    ⚠️ このチャットに個人情報（氏名・電話番号・パスワード等）は入力しないでください
+<!-- 注意バナー -->
+<div class="privacy-banner">
+  <span>⚠️ <strong>パスワード・認証コード・児童名簿・住所・電話番号などの個人情報はここに入力しないでください。</strong>　判断に迷う場合はPTA連合会担当者に確認してください。</span>
+</div>
+
+<div class="app-wrapper">
+
+  <!-- ── チャットモード ─────────────────────────── -->
+  <div id="panel-chat" class="mode-panel active">
+    <div class="chat-shell">
+      <div id="chat-area"></div>
+      <div class="input-bar">
+        <textarea id="user-input" rows="1" placeholder="お困りのことを入力してください（例：フォームを作りたい）"></textarea>
+        <button id="send-btn" title="送信">▶</button>
+      </div>
+    </div>
   </div>
 
-  <!-- チャットエリア -->
-  <div id="chat-area"></div>
+  <!-- ── ブラウズモード ─────────────────────────── -->
+  <div id="panel-browse" class="mode-panel">
+    <div class="browse-shell">
 
-  <!-- 入力欄 -->
-  <div class="input-bar">
-    <textarea
-      id="user-input"
-      rows="1"
-      placeholder="お困りのことを入力してください（例：PDFにできない）"
-    ></textarea>
-    <button id="send-btn" title="送信">▶</button>
+      <!-- 特別ビュー -->
+      <div class="special-view-bar">
+        <button class="sv-btn" onclick="applySpecialView('frequent',this)">⭐ よくある質問</button>
+        <button class="sv-btn" onclick="applySpecialView('handover',this)">🤝 引き継ぎで確認すること</button>
+        <button class="sv-btn" onclick="applySpecialView('yearstart',this)">🌸 年度初めによくある質問</button>
+        <button class="sv-btn" onclick="applySpecialView('privacy',this)">🔒 個人情報注意の項目</button>
+        <button class="sv-btn" onclick="applySpecialView('all',this)">📋 全て表示</button>
+      </div>
+
+      <!-- カテゴリフィルタ -->
+      <div class="cat-filter-bar" id="cat-filter-bar">
+        <button class="cf-btn active" onclick="applyCatFilter('',this)">すべて</button>
+      </div>
+
+      <!-- 検索 -->
+      <div class="browse-search">
+        <input type="text" id="browse-input" placeholder="キーワードで検索（例：PDF、引き継ぎ、フォーム）" oninput="onBrowseSearch(this.value)">
+      </div>
+
+      <div class="results-header" id="results-header">読み込み中...</div>
+      <div class="faq-card-grid" id="faq-card-grid"></div>
+    </div>
   </div>
 
-</div><!-- /.app-wrapper -->
+</div>
 
-
-<!-- ================================================================
-     管理者パネル
-     ================================================================ -->
+<!-- 管理者オーバーレイ（チャット画面から） -->
 <button id="admin-toggle">⚙️ 管理者</button>
-
-<div id="admin-panel" role="dialog" aria-modal="true" aria-label="管理者パネル">
+<div id="admin-overlay" onclick="if(event.target===this)closeAdmin()">
   <div class="admin-modal">
-    <h2>⚙️ 管理者パネル — FAQ 管理</h2>
-    <p style="font-size:.82rem;color:var(--gray-600);margin-bottom:12px">
-      ※ ここでの変更はページを閉じるとリセットされます。<br>
-      　 恒久的に変更するには <code>faqData.js</code> を直接編集してください。
+    <h2>⚙️ FAQ 管理パネル</h2>
+    <p style="font-size:.78rem;color:var(--gray-600);margin-bottom:12px">
+      恒久的な変更は <code>faqData.js</code> を直接編集してください。<br>
+      詳しい管理は <a href="admin.html" target="_blank">管理ページ（admin.html）</a> をご覧ください。
     </p>
-
-    <h3>📋 登録済み FAQ 一覧</h3>
-    <div class="admin-faq-list" id="admin-faq-container"></div>
-
-    <!-- 簡易編集フォーム -->
-    <div id="admin-edit-form" style="display:none">
-      <h3>✏️ FAQ を編集</h3>
+    <div class="admin-faq-list" id="modal-faq-list"></div>
+    <div id="modal-edit-form" style="display:none;margin-top:14px">
       <input type="hidden" id="edit-id">
       <div class="admin-form">
-        <label>質問タイトル
-          <input type="text" id="edit-title" placeholder="例：GoogleドキュメントをPDFにしたい">
-        </label>
-        <label>一言まとめ（回答の先頭に表示）
-          <textarea id="edit-summary" placeholder="例：大丈夫です！「ファイル」メニューから簡単にPDFに変換できます。"></textarea>
-        </label>
-        <label>キーワード（カンマ区切り）
-          <input type="text" id="edit-keywords" placeholder="例：pdf, 保存, ドキュメント">
-        </label>
+        <label>質問タイトル<input type="text" id="edit-title"></label>
+        <label>一言まとめ<textarea id="edit-summary"></textarea></label>
+        <label>キーワード（カンマ区切り）<input type="text" id="edit-keywords"></label>
         <div style="display:flex;gap:8px">
-          <button class="admin-save-btn" id="admin-save-btn">保存</button>
-          <button class="admin-close-btn" id="admin-cancel-btn">キャンセル</button>
+          <button class="admin-save-btn" onclick="saveEdit()">保存</button>
+          <button class="admin-close-btn" onclick="document.getElementById('modal-edit-form').style.display='none'">キャンセル</button>
         </div>
       </div>
     </div>
-
-    <div style="margin-top:20px;border-top:1px solid var(--gray-200);padding-top:16px">
-      <h3>📌 FAQ を追加するには</h3>
-      <p style="font-size:.83rem;color:var(--gray-600);line-height:1.7">
-        <code>faqData.js</code> の <code>faqList</code> 配列に新しいエントリを追加してください。<br>
-        各エントリの書き方は <code>README.md</code> に記載されています。
-      </p>
-    </div>
-
     <div style="text-align:right;margin-top:16px">
-      <button class="admin-close-btn" id="admin-close">閉じる</button>
+      <button class="admin-close-btn" onclick="closeAdmin()">閉じる</button>
     </div>
   </div>
 </div>
 
-
-<!-- ================================================================
-     スクリプト（faqData.js → script.js の順で読む）
-     ================================================================ -->
 <script src="faqData.js"></script>
 <script src="script.js"></script>
-
 </body>
 </html>
