@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PTA IT サポートチャットボット</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ================================================================
+     メインアプリ
+     ================================================================ -->
+<div class="app-wrapper">
+
+  <!-- ヘッダー -->
+  <header class="app-header">
+    <div class="header-icon">💬</div>
+    <div>
+      <h1>PTA IT サポートチャットボット</h1>
+      <div class="header-sub">Google Workspace・スマホ操作など、お気軽にどうぞ</div>
+    </div>
+  </header>
+
+  <!-- 個人情報の注意 -->
+  <div class="privacy-note">
+    ⚠️ このチャットに個人情報（氏名・電話番号・パスワード等）は入力しないでください
+  </div>
+
+  <!-- チャットエリア -->
+  <div id="chat-area"></div>
+
+  <!-- 入力欄 -->
+  <div class="input-bar">
+    <textarea
+      id="user-input"
+      rows="1"
+      placeholder="お困りのことを入力してください（例：PDFにできない）"
+    ></textarea>
+    <button id="send-btn" title="送信">▶</button>
+  </div>
+
+</div><!-- /.app-wrapper -->
+
+
+<!-- ================================================================
+     管理者パネル
+     ================================================================ -->
+<button id="admin-toggle">⚙️ 管理者</button>
+
+<div id="admin-panel" role="dialog" aria-modal="true" aria-label="管理者パネル">
+  <div class="admin-modal">
+    <h2>⚙️ 管理者パネル — FAQ 管理</h2>
+    <p style="font-size:.82rem;color:var(--gray-600);margin-bottom:12px">
+      ※ ここでの変更はページを閉じるとリセットされます。<br>
+      　 恒久的に変更するには <code>faqData.js</code> を直接編集してください。
+    </p>
+
+    <h3>📋 登録済み FAQ 一覧</h3>
+    <div class="admin-faq-list" id="admin-faq-container"></div>
+
+    <!-- 簡易編集フォーム -->
+    <div id="admin-edit-form" style="display:none">
+      <h3>✏️ FAQ を編集</h3>
+      <input type="hidden" id="edit-id">
+      <div class="admin-form">
+        <label>質問タイトル
+          <input type="text" id="edit-title" placeholder="例：GoogleドキュメントをPDFにしたい">
+        </label>
+        <label>一言まとめ（回答の先頭に表示）
+          <textarea id="edit-summary" placeholder="例：大丈夫です！「ファイル」メニューから簡単にPDFに変換できます。"></textarea>
+        </label>
+        <label>キーワード（カンマ区切り）
+          <input type="text" id="edit-keywords" placeholder="例：pdf, 保存, ドキュメント">
+        </label>
+        <div style="display:flex;gap:8px">
+          <button class="admin-save-btn" id="admin-save-btn">保存</button>
+          <button class="admin-close-btn" id="admin-cancel-btn">キャンセル</button>
+        </div>
+      </div>
+    </div>
+
+    <div style="margin-top:20px;border-top:1px solid var(--gray-200);padding-top:16px">
+      <h3>📌 FAQ を追加するには</h3>
+      <p style="font-size:.83rem;color:var(--gray-600);line-height:1.7">
+        <code>faqData.js</code> の <code>faqList</code> 配列に新しいエントリを追加してください。<br>
+        各エントリの書き方は <code>README.md</code> に記載されています。
+      </p>
+    </div>
+
+    <div style="text-align:right;margin-top:16px">
+      <button class="admin-close-btn" id="admin-close">閉じる</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ================================================================
+     スクリプト（faqData.js → script.js の順で読む）
+     ================================================================ -->
+<script src="faqData.js"></script>
+<script src="script.js"></script>
+
+</body>
+</html>
