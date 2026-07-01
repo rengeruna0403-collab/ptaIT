@@ -3,18 +3,95 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>PTA IT ナレッジベース</title>
+  <title>PTA IT ナレッジベース｜みやP会員校理事専用</title>
   <link rel="stylesheet" href="style.css">
+  <style>
+    /* ── ゲートオーバーレイ ── */
+    #gate-overlay {
+      position: fixed; inset: 0; z-index: 9999;
+      background: linear-gradient(135deg, #1e3a8a 0%, #1d4ed8 60%, #2563eb 100%);
+      display: flex; align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    #gate-overlay.hidden { display: none; }
+    .gate-card {
+      background: #fff; border-radius: 16px; padding: 36px 32px;
+      max-width: 480px; width: 100%; box-shadow: 0 20px 60px rgba(0,0,0,.3);
+      text-align: center;
+    }
+    .gate-icon { font-size: 2.4rem; margin-bottom: 12px; }
+    .gate-card h1 { font-size: 1.15rem; font-weight: 700; color: #1e3a8a; margin: 0 0 6px; }
+    .gate-card .gate-sub { font-size: .82rem; color: #555; margin-bottom: 22px; }
+    .gate-notice {
+      background: #fef9c3; border: 1px solid #fde047; border-radius: 10px;
+      padding: 14px 16px; margin-bottom: 14px; text-align: left;
+    }
+    .gate-notice p { margin: 0 0 6px; font-size: .82rem; color: #713f12; line-height: 1.65; }
+    .gate-notice p:last-child { margin: 0; }
+    .gate-notice strong { color: #92400e; }
+    .gate-warning {
+      background: #fef2f2; border: 1px solid #fca5a5; border-radius: 10px;
+      padding: 12px 16px; margin-bottom: 22px; text-align: left;
+      font-size: .8rem; color: #991b1b; line-height: 1.7;
+    }
+    .gate-confirm-btn {
+      background: #1d4ed8; color: #fff; border: none; border-radius: 10px;
+      padding: 14px 32px; font-size: 1rem; font-weight: 700; cursor: pointer;
+      width: 100%; transition: background .15s;
+    }
+    .gate-confirm-btn:hover { background: #1e40af; }
+    .gate-note { font-size: .72rem; color: #9ca3af; margin-top: 14px; line-height: 1.6; }
+    /* ── 公開制限バナー（ページ内常時表示） ── */
+    .restricted-banner {
+      background: #1e3a8a; color: #fff;
+      padding: 6px 16px; font-size: .76rem; text-align: center;
+      letter-spacing: .02em;
+    }
+    .restricted-banner strong { color: #fde047; }
+  </style>
 </head>
 <body>
 
-<!-- ヘッダー -->
+<!-- ════ 入口確認ゲート（本格的な認証ではありません） ════ -->
+<div id="gate-overlay">
+  <div class="gate-card">
+    <div class="gate-icon">🔒</div>
+    <h1>みやP会員校 理事専用ページ</h1>
+    <p class="gate-sub">PTA IT ナレッジベース</p>
+
+    <div class="gate-notice">
+      <p>⚠️ <strong>このページはみやP会員校理事向けです。</strong></p>
+      <p>URLや画面の内容を外部へ共有しないようお願いいたします。</p>
+    </div>
+
+    <div class="gate-warning">
+      <strong>🔒 セキュリティのため、次の情報は入力しないでください</strong><br><br>
+      ・パスワード<br>
+      ・認証コード<br>
+      ・児童・保護者の個人情報
+    </div>
+
+    <button class="gate-confirm-btn" onclick="confirmGate()">
+      ページに入る
+    </button>
+
+    <p class="gate-note">
+      みやP会員校理事専用ページです。第三者への共有はご遠慮ください。
+    </p>
+  </div>
+</div>
+
+<!-- ════ ヘッダー ════ -->
+<div class="restricted-banner">
+  🔒 <strong>みやP会員校 理事専用</strong>　このページのURLを外部に共有しないでください
+</div>
+
 <header class="app-header">
   <div class="header-top">
     <div class="header-icon">💬</div>
     <div>
       <h1>PTA IT ナレッジベース</h1>
-      <div class="sub">Google Workspace・引き継ぎ・IT操作のよくある質問</div>
+      <div class="sub">みやP会員校理事向け｜Google Workspace・引き継ぎ・IT操作</div>
     </div>
     <a href="admin.html" style="margin-left:auto;color:rgba(255,255,255,.7);font-size:.75rem;text-decoration:none;white-space:nowrap">⚙️ 管理</a>
   </div>
@@ -24,7 +101,7 @@
   </nav>
 </header>
 
-<!-- 注意バナー -->
+<!-- 注意バナー（常時表示） -->
 <div class="privacy-banner">
   <span>⚠️ <strong>パスワード・認証コード・児童名簿・住所・電話番号などの個人情報はここに入力しないでください。</strong>　判断に迷う場合はPTA連合会担当者に確認してください。</span>
 </div>
@@ -100,6 +177,19 @@
   </div>
 </div>
 
+<script>
+// ゲート確認処理
+function confirmGate() {
+  sessionStorage.setItem('pta_gate_confirmed', '1');
+  document.getElementById('gate-overlay').classList.add('hidden');
+}
+// 同一セッション内で確認済みならスキップ
+(function() {
+  if (sessionStorage.getItem('pta_gate_confirmed') === '1') {
+    document.getElementById('gate-overlay').classList.add('hidden');
+  }
+})();
+</script>
 <script src="faqData.js"></script>
 <script src="script.js"></script>
 </body>

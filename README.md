@@ -1,7 +1,42 @@
-# PTA IT ナレッジベース
+# PTA IT ナレッジベース｜みやP会員校理事専用
 
-PTA役員向けの Google Workspace 操作・引き継ぎ・個人情報管理などに関するナレッジベースです。  
+**みやP会員校の理事向け**に限定公開された Google Workspace 操作・引き継ぎ・個人情報管理のナレッジベースです。  
 **サーバー不要・静的HTMLのみ**で動作し、GitHub Pages で公開できます。
+
+> ⚠️ **このページのURLを外部（理事以外の方・SNS・メールなど）に共有することは禁止です。**
+
+---
+
+## アクセス制限について（重要）
+
+### ⚠️ GitHub Pages は「完全な非公開」ではありません
+
+GitHub Pages の Public リポジトリに公開したページは、URLを知っていれば**誰でもアクセスできます**。  
+`index.html` 上の確認画面（「確認しました」ボタン）は**本格的な認証・アクセス制限ではありません**。  
+ブラウザの開発者ツールやURLの直接入力で簡単に回避できます。
+
+このページに実際の個人情報（名前・電話番号・住所・名簿など）は絶対に記載しないでください。
+
+### 本格的な限定公開には Cloudflare Access を推奨
+
+静的サイトのまま本格的なアクセス制限をかけるには **Cloudflare Access**（無料プランあり）が最も簡単です。
+
+| 方法 | 難易度 | 費用 | 概要 |
+|---|---|---|---|
+| Cloudflare Access | ★★☆ | 無料（50ユーザーまで） | メールアドレス認証でアクセス制限。GitHub Pagesと組み合わせ可 |
+| Cloudflare Pages + Access | ★★☆ | 無料 | GitHub連携で自動デプロイ＋アクセス制限 |
+| Netlify Identity | ★★☆ | 無料（1000ユーザーまで） | GitHubと連携、招待制アクセス |
+| Basic認証（.htaccess） | ★☆☆ | 無料 | GitHub Pagesでは**使えない**。サーバーが必要 |
+
+**Cloudflare Access の設定手順（概要）：**
+
+1. [Cloudflare](https://www.cloudflare.com/) に無料登録
+2. 「Zero Trust」→「Access」→「Applications」→ Add an application
+3. Self-hosted を選択し、保護したいURLを入力
+4. Policy で「Emails」に理事のメールアドレスを列挙
+5. 保存するとアクセス時にメール認証が求められるようになる
+
+> アプリ本体（HTML/CSS/JS）は静的サイトのままで対応できます。将来的に Cloudflare Access を追加しても `faqData.js` 等の変更は不要です。
 
 ---
 
